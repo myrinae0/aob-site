@@ -3367,3 +3367,110 @@ body {
 html {
   font-size: 16px;
 }
+
+/* ===== /events: calendar buttons, and the month as a list on phones ===== */
+button.notion-collection-calendar__header-date-back,
+button.notion-collection-calendar__header-date-forward,
+button.notion-collection-calendar__header-date-today {
+  box-sizing: border-box;
+}
+.notion-collection-calendar__header-date-back:focus-visible,
+.notion-collection-calendar__header-date-forward:focus-visible,
+.notion-collection-calendar__header-date-today:focus-visible,
+.aob-cal-list a:focus-visible {
+  outline: 2px solid var(--color-text-default);
+  outline-offset: 1px;
+}
+.aob-cal--list .notion-collection-calendar__week-days {
+  display: none;
+}
+.aob-cal--list .notion-collection-calendar__header-date-back,
+.aob-cal--list .notion-collection-calendar__header-date-forward {
+  width: 36px;
+  height: 36px;
+  padding: 11px;
+}
+.aob-cal--list .notion-collection-calendar__header-date-today {
+  height: 36px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+.aob-cal--list .notion-collection-calendar__header-date {
+  font-size: 1rem;
+}
+.aob-cal-list {
+  border-top: 1px solid var(--color-border-dark);
+}
+.aob-cal-list__items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.aob-cal-list__item {
+  position: relative;
+  padding: 12px 8px;
+  border-bottom: 1px solid var(--color-border-dark);
+}
+.aob-cal-list__item.has-link:hover {
+  background: var(--color-ui-hover-bg);
+}
+.aob-cal-list__date {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--color-text-default-light);
+}
+.aob-cal-list__title {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 2px 0 0 !important;          /* the theme sizes every h3 with !important */
+  font-family: var(--primary-font);
+  font-size: 1.0625rem !important;
+  font-weight: 600 !important;
+  letter-spacing: normal !important;
+  line-height: 1.4;
+  color: var(--color-text-default);
+  overflow-wrap: anywhere;
+}
+.aob-cal-list__icon {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin-top: 0.15em;
+  font-size: 14px;
+  line-height: 16px;
+}
+.aob-cal-list__title a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--color-border-dark);
+  text-underline-offset: 3px;
+}
+.aob-cal-list__title a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+.aob-cal-list__loc {
+  margin-top: 2px;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: var(--color-text-default-light);
+}
+.aob-cal-list__pills {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+.aob-cal-list__empty {
+  padding: 16px 8px;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--color-text-default-light);
+}
+.aob-cal-list__empty a {
+  color: var(--color-text-default);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

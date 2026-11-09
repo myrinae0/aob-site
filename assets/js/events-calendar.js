@@ -1,4 +1,5 @@
-/* The month calendar on /events, as super.so drew it from the Notion "events" database.
+/* The month calendar on /events, as super.so drew it from the Notion "events" database
+   (on phones, 546px and narrower, a list of the shown month's events instead).
    The database rows below were copied from the live site (November 2026); the layout
    (week rows, multi-day bars, stacking, the "Today" button) follows super.so's markup. */
 (function () {
@@ -63,7 +64,7 @@
   function card(e) {
     var id = e[0], title = esc(e[1]), icon = e[2], uri = e[3], loc = e[4], pills = e[5];
     var iconHtml = icon.indexOf("img:") === 0
-      ? '<img width="16" height="16" class="notion-icon" loading="lazy" src="' + ROOT + icon.slice(4) +
+      ? '<img width="16" height="16" class="notion-icon" loading="lazy" decoding="async" src="' + ROOT + icon.slice(4) +
         '" style="object-fit: contain; object-position: center center;">'
       : '<span class="notion-icon text" style="width: 16px; height: 16px; font-size: 16px; fill: var(--color-text-default-light);">' + icon + "</span>";
     var h = '<div id="block-' + id + '" class="notion-collection-card calendar' + (uri ? "" : " no-click") + '" style="height: 76px;">';
@@ -83,11 +84,58 @@
 
   function pct(n) { return +(n * 100 / 7).toPrecision(6) + "%"; }
 
-  // At phone widths (546px and below) super.so drew the calendar without events or month names.
+  // At phone widths (546px and below) the month is shown as a list of its events instead of
+  // the grid (super.so drew an empty grid there). Wider screens get the grid, as before.
   var phone = window.matchMedia("(max-width: 546px)");
+  var WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+  // "Sat, Nov 22", with the year added when it isn't the year being shown
+  function day(t, year) {
+    var d = new Date(t), y = d.getUTCFullYear();
+    return WEEKDAYS[d.getUTCDay()] + ", " + SHORT[d.getUTCMonth()] + " " + d.getUTCDate() + (y === year ? "" : ", " + y);
+  }
+  function iso(t) { return new Date(t).toISOString().slice(0, 10); }
+
+  function list(year, month) {
+    var first = Date.UTC(year, month, 1), last = Date.UTC(year, month + 1, 0), rows = [];
+    for (var i = 0; i < EVENTS.length; i++) {                        // every event touching this month
+      var es = utc(EVENTS[i][6]), ee = utc(EVENTS[i][7]);
+      if (ee >= first && es <= last) rows.push([es, ee, EVENTS[i]]);
+    }
+    rows.sort(function (a, b) { return a[0] - b[0] || a[1] - b[1]; });
+    if (!rows.length)
+      return '<div class="aob-cal-list"><p class="aob-cal-list__empty">No events this month. <a href="' +
+             link("/discord") + '">Join the Discord</a> to hear about the next one.</p></div>';
+    var h = '<div class="aob-cal-list"><ul class="aob-cal-list__items">';
+    for (i = 0; i < rows.length; i++) {
+      var r = rows[i], e = r[2], title = esc(e[1].trim()), icon = e[2], uri = e[3], loc = e[4], pills = e[5];
+      var when = '<time datetime="' + iso(r[0]) + '">' + day(r[0], year) + "</time>";
+      if (r[1] !== r[0]) when += ' – <time datetime="' + iso(r[1]) + '">' + day(r[1], year) + "</time>";
+      var iconHtml = icon.indexOf("img:") === 0
+        ? '<img class="aob-cal-list__icon" width="16" height="16" alt="" decoding="async" src="' + ROOT + icon.slice(4) + '">'
+        : '<span class="aob-cal-list__icon" aria-hidden="true">' + icon + "</span>";
+      h += '<li class="aob-cal-list__item' + (uri ? " has-link" : "") + '"><p class="aob-cal-list__date">' + when + "</p>" +
+           '<h3 class="aob-cal-list__title">' + iconHtml +
+           (uri ? '<a href="' + link(uri) + '">' + title + "</a>" : "<span>" + title + "</span>") + "</h3>";
+      if (loc) h += '<p class="aob-cal-list__loc">' + esc(loc) + "</p>";
+      if (pills.length) {
+        h += '<p class="aob-cal-list__pills">';
+        for (var p = 0; p < pills.length; p++)
+          h += '<span class="notion-pill pill-' + pills[p][0] + '">' + esc(pills[p][1]) + "</span>";
+        h += "</p>";
+      }
+      h += "</li>";
+    }
+    return h + "</ul></div>";
+  }
 
   function render(cal, year, month) {
     var now = new Date(), mobile = phone.matches;
+    var old = cal.querySelectorAll(".notion-collection-calendar__row, .aob-cal-list");
+    for (var r = 0; r < old.length; r++) old[r].parentNode.removeChild(old[r]);
+    cal.querySelector(".notion-collection-calendar__header-date").textContent = MONTHS[month] + " " + year;
+    cal.classList.toggle("aob-cal--list", mobile);
+    if (mobile) { cal.insertAdjacentHTML("beforeend", list(year, month)); return; }
     var today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
     var first = Date.UTC(year, month, 1);
     var start = first - new Date(first).getUTCDay() * DAY;            // Sunday on or before the 1st
@@ -104,10 +152,10 @@
         // super.so greys out days outside the shown month, and any day not in the current year
         var active = m === month && dt.getUTCFullYear() === now.getFullYear();
         var num = "notion-collection-calendar__date-number" + (t === today ? " today" : "") + (active ? "" : " inactive");
-        var label = (dt.getUTCDate() === 1 && !mobile ? SHORT[m] : "") + " " + dt.getUTCDate();
+        var label = (dt.getUTCDate() === 1 ? SHORT[m] : "") + " " + dt.getUTCDate();
         cells += '<div class="' + cls + '"><div class="' + num + '">' + label + "</div></div>";
       }
-      for (var i = 0; i < (mobile ? 0 : EVENTS.length); i++) {      // phones: super.so showed no events
+      for (var i = 0; i < EVENTS.length; i++) {
         var e = EVENTS[i], es = utc(e[6]), ee = utc(e[7]);
         if (ee < ws || es > we) continue;
         var cont = es < ws, from = cont ? ws : es;
@@ -128,9 +176,6 @@
       html += '<div class="notion-collection-calendar__row" style="height: ' + height + 'px;">' +
               cells + items + "</div>";
     }
-    cal.querySelector(".notion-collection-calendar__header-date").textContent = MONTHS[month] + " " + year;
-    var rows = cal.querySelectorAll(".notion-collection-calendar__row");
-    for (var r = 0; r < rows.length; r++) rows[r].parentNode.removeChild(rows[r]);
     cal.insertAdjacentHTML("beforeend", html);
   }
 
