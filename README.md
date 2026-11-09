@@ -15,10 +15,12 @@ index.html               home page
 style.css                super.so / Notion / "funky" theme styles plus the site's own CSS,
                          trimmed to the rules the site uses
 assets/fonts/            Space Grotesk (400, 500, 600, 700), the files super.so served
-assets/img/              every image from the pages (downloaded from super.so and Notion)
+assets/img/              every image from the pages (downloaded from super.so and Notion),
+                         plus smaller .webp copies of the JPG/PNG/GIF ones (see "Images" below)
 assets/favicon.png       browser-tab icon
 assets/js/site.js        toggles, mobile menu and search
 assets/js/events-calendar.js   the month calendar on /events, with the events database rows
+tools/check_assets.py    checks that every file the pages refer to exists (run before committing)
 .nojekyll                tells GitHub Pages to serve the files as they are
 ```
 
@@ -48,6 +50,9 @@ shows the link in case that doesn't happen.
   of published pages by title.
 - **events-calendar.js**: draws the /events calendar for the current month, with
   back / Today / forward, from the 42 dated rows of the Notion events database.
+  On phones (546px wide and narrower) it shows the same month as a list instead:
+  each event's date or dates, title (linked to its page when it has one), place and
+  tags, or "No events this month" with a link to the Discord.
 
 There are no trackers, cookies or analytics (super.so's cookie banner code, Vercel
 analytics and the Next.js runtime are gone).
@@ -57,8 +62,11 @@ analytics and the Next.js runtime are gone).
 - Search results come from a fixed list of the 31 pages super.so's search
   returned, matched by word start like the original. The order of results follows
   the original's for nearly every query, but not every one.
-- On phones (546px wide and narrower) the /events calendar shows no events and no
-  month names, because that is what super.so showed there.
+- On phones (546px wide and narrower) the /events calendar is a list of the
+  month's events. super.so showed an empty grid there (no events, no month names).
+- The calendar's back / Today / forward controls are real buttons (same look), so
+  they work with a keyboard and screen readers.
+- Images are lighter (see "Images" below). They look the same.
 - Link previews (Open Graph images) point to copies in `assets/og/`, resized to
   1200px where super.so served the full upload (up to 10 MB).
 - Three links that were already broken on the original stay as they were:
@@ -67,6 +75,25 @@ analytics and the Next.js runtime are gone).
   /events/raw-providence-artist-showcase (the same address plus
   `/ecbf8a7de1e34512bb1b56b0f0b09f67` and `/e995c5f914e64f9292005ee12a3b14dc`).
   They lead to the 404 page, as before.
+
+## Images
+
+- Large JPG and PNG images have a WebP copy next to them in `assets/img/` (same
+  name, `.webp`), about a third smaller. Pages load them with
+  `<picture style="display:contents"><source type="image/webp" srcset="....webp"><img src="....jpg"></picture>`,
+  so very old browsers still get the JPG/PNG. The nav logo's WebP is lossless (9 KB
+  instead of 24 KB). JPGs where WebP saved little are left as they were.
+- The animated GIF on the home page (`214338b5-aob_ramen_rumble.gif`, 1080px, shown at
+  384px) has an animated WebP copy at 768px; the GIF stays as the fallback.
+- Some large WebPs were re-encoded at quality 80 under the same names.
+- Open Graph images in `assets/og/` keep their names, formats and sizes (link
+  previews need JPG/PNG); two JPGs were re-encoded at quality 85 and the PNG was
+  re-compressed losslessly.
+- Images below the top of the page load lazily (`loading="lazy"`), and their
+  `width`/`height` match the image's shape so the page doesn't jump while they load.
+
+To add an image: put it in `assets/img/`, and if it's a big photo, add a `.webp` copy
+and a `<picture>` like the ones above. Then run `python3 tools/check_assets.py`.
 
 ## Content that no longer updates itself
 
