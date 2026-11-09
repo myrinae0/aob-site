@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr" class="theme-light">
-<head>
+<head><meta http-equiv="refresh" content="0; url=../speedfriending/">
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>alreadyfriends</title>
@@ -40,14 +40,14 @@
         '/discord': 'https://discord.gg/e4bhF6DEnX',
         '/facebook': 'https://www.facebook.com/groups/1261564714299008',
         '/instagram': 'https://www.instagram.com/asiansofboston/',
-        '/alreadyfriends': 'https://asiansofboston.com/speedfriending',
+        '/alreadyfriends': '../speedfriending/',
         '/steam': 'https://steamcommunity.com/chat/invite/TCmdY4LX',
         '/donations': 'https://account.venmo.com/u/danielle-desu',
     };
 
     function redirect_them() {
         // static copy: pages live in folders, so /discord is served as /discord/
-        var path = location.pathname.replace(/\/(index\.html)?$/, "");
+        var path = "/" + location.pathname.replace(/\/(index\.html)?$/, "").split("/").pop();
         if (path in redirects) {
             window.location.replace(redirects[path]);
         }

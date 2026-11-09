@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr" class="theme-light">
-<head>
+<head><meta http-equiv="refresh" content="0; url=https://account.venmo.com/u/danielle-desu">
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>donations</title>
@@ -47,7 +47,7 @@
 
     function redirect_them() {
         // static copy: pages live in folders, so /discord is served as /discord/
-        var path = location.pathname.replace(/\/(index\.html)?$/, "");
+        var path = "/" + location.pathname.replace(/\/(index\.html)?$/, "").split("/").pop();
         if (path in redirects) {
             window.location.replace(redirects[path]);
         }
